@@ -1,0 +1,19 @@
+1. Liver disease prediction: 
+	Model : SVM / Logistic reg
+	Accuracy : 72.02 / 72.72
+	
+
+2. Diabetes:
+	Model : XGBoost(Hyperparameter optimization)
+	Accuracy : 89.07
+
+
+3. Heart:
+	Model : Random Forest
+	Accuracy : 95.08
+
+
+4. Kidney:
+	Model : Random Forest
+	Accuracy : 97.5
+	
