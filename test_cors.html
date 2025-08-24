@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Disease Prediction API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CORS Test - Disease Prediction API</h1>
+        <p>This page tests if the API accepts requests from localhost:5173 (simulating your frontend)</p>
+        
+        <div class="test-section">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealth()">Test Health Endpoint</button>
+            <div id="healthResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Root Endpoint</h2>
+            <button onclick="testRoot()">Test Root Endpoint</button>
+            <div id="rootResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Heart Disease Prediction</h2>
+            <button onclick="testHeartDisease()">Test Heart Disease Prediction</button>
+            <div id="heartResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Diabetes Prediction</h2>
+            <button onclick="testDiabetes()">Test Diabetes Prediction</button>
+            <div id="diabetesResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Test All Endpoints</h2>
+            <button onclick="testAll()">Test All Endpoints</button>
+            <div id="allResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        async function makeRequest(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                throw new Error(`Request failed: ${error.message}`);
+            }
+        }
+
+        function displayResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function testHealth() {
+            try {
+                const result = await makeRequest('/health');
+                displayResult('healthResult', result, true);
+            } catch (error) {
+                displayResult('healthResult', { error: error.message }, false);
+            }
+        }
+
+        async function testRoot() {
+            try {
+                const result = await makeRequest('/');
+                displayResult('rootResult', result, true);
+            } catch (error) {
+                displayResult('rootResult', { error: error.message }, false);
+            }
+        }
+
+        async function testHeartDisease() {
+            try {
+                const heartData = {
+                    "age": 63,
+                    "sex": 1,
+                    "cp": 3,
+                    "trestbps": 145,
+                    "chol": 233,
+                    "fbs": 1,
+                    "restecg": 0,
+                    "thalach": 150,
+                    "exang": 0,
+                    "oldpeak": 2.3,
+                    "slope": 0,
+                    "ca": 0,
+                    "thal": 1
+                };
+                
+                const result = await makeRequest('/predict/heart', 'POST', heartData);
+                displayResult('heartResult', result, true);
+            } catch (error) {
+                displayResult('heartResult', { error: error.message }, false);
+            }
+        }
+
+        async function testDiabetes() {
+            try {
+                const diabetesData = {
+                    "pregnancies": 6,
+                    "glucose": 148,
+                    "blood_pressure": 72,
+                    "skin_thickness": 35,
+                    "insulin": 0,
+                    "bmi": 33.6,
+                    "diabetes_pedigree_function": 0.627,
+                    "age": 50
+                };
+                
+                const result = await makeRequest('/predict/diabetes', 'POST', diabetesData);
+                displayResult('diabetesResult', result, true);
+            } catch (error) {
+                displayResult('diabetesResult', { error: error.message }, false);
+            }
+        }
+
+        async function testAll() {
+            const results = {};
+            
+            try {
+                results.health = await makeRequest('/health');
+                results.root = await makeRequest('/');
+                
+                const heartData = {
+                    "age": 63, "sex": 1, "cp": 3, "trestbps": 145, "chol": 233,
+                    "fbs": 1, "restecg": 0, "thalach": 150, "exang": 0,
+                    "oldpeak": 2.3, "slope": 0, "ca": 0, "thal": 1
+                };
+                results.heart = await makeRequest('/predict/heart', 'POST', heartData);
+                
+                const diabetesData = {
+                    "pregnancies": 6, "glucose": 148, "blood_pressure": 72,
+                    "skin_thickness": 35, "insulin": 0, "bmi": 33.6,
+                    "diabetes_pedigree_function": 0.627, "age": 50
+                };
+                results.diabetes = await makeRequest('/predict/diabetes', 'POST', diabetesData);
+                
+                displayResult('allResult', results, true);
+            } catch (error) {
+                displayResult('allResult', { error: error.message }, false);
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            console.log('CORS Test Page Loaded');
+            console.log('Make sure your API is running on http://localhost:8000');
+        };
+    </script>
+</body>
+</html>
